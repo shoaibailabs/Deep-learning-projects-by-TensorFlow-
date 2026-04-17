@@ -1,2 +1,1 @@
-# Deep-learning-projects-by-TensorFlow-
-A collection of deep learning projects built using TensorFlow, focused on real-world AI applications such as image classification, neural networks, and model training workflows. This repository is designed to help beginners and intermediate learners understand practical deep learning concepts through hands-on implementation.
+A deep learning project that uses an Artificial Neural Network (ANN) to classify handwritten digits (0–9). The model is trained on image data and can accurately predict digits, demonstrating the basics of image recognition and neural networks
