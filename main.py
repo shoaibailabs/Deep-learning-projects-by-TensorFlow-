@@ -4,41 +4,48 @@ import matplotlib
 import sklearn
 import pandas as pd
 
+df=pd.read_csv('D:\\my practise\\csv files\\Churn_Modelling (1).csv')
+# pd.set_option('Display.max_columns',14)
 
-from keras.datasets import mnist
-(x_train,y_train),(x_test,y_test)=mnist.load_data()
-print(x_train.shape) 
+nan=df.isnull().sum().sum()
+duplicat=df.duplicated().sum()
 
-x_train=x_train/255
-x_test=x_test/255
+df.drop(columns=['Surname','RowNumber','CustomerId'],inplace=True)
+df=pd.get_dummies(df,columns=['Geography','Gender'],drop_first=True,dtype='int64')
 
+x=df.iloc[:,:-1]
+y=df['Exited']
+from sklearn.preprocessing import StandardScaler
+scaler=StandardScaler()
+x=pd.DataFrame(scaler.fit_transform(x),columns=x.columns)
+
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2,random_state=42)
+
+import tensorflow
 from keras.models import Sequential
-from keras.layers import Dense,Dropout,Flatten
+from keras.layers import Dense
+
 
 model=Sequential()
-model.add(Flatten(input_shape=(28,28)))
+model.add(Dense(256,activation='relu',input_dim=11))
 model.add(Dense(128,activation='relu'))
-model.add(Dropout(0.3))
-model.add(Dense(128,activation='relu'))
-model.add(Dropout(0.3))
-model.add(Dense(10,activation='softmax'))
-# print(model.summary())
+model.add(Dense(1,activation='sigmoid'))
+model.compile(loss='binary_crossentropy',optimizer='Adam',metrics=['accuracy'])
+history=model.fit(x_train,y_train,epochs=3,validation_split=0.2)
 
-model.compile(optimizer='adam',loss='sparse_categorical_crossentropy',metrics=['accuracy'])
-history=model.fit(x_train,y_train,epochs=10,validation_split=0.2)
+summary=model.summary()
+print(summary)
 
+y_log=model.predict(x_test)
+y_pred=np.where(y_log>0.5,1,0)
 from sklearn.metrics import accuracy_score
-y_prd=model.predict(x_test)
-y_prd=y_prd.argmax(axis=1)
-print(y_prd.shape)
+acc_score=accuracy_score(y_test,y_pred)*100
 
-score=accuracy_score(y_test,y_prd)
-print(score)
-
-# prediction
-plt.imshow(x_test[0])
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
 plt.show()
 
-prd=model.predict(x_test[0].reshape(1,28,28))
-print(prd.argmax(axis=1))
-
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.show()
